@@ -1,399 +1,186 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import TournamentCardComponent from "@/components/tournament/cardComponent";
-import {
-  Calendar,
-  Users,
-  Trophy,
-  ChevronRight,
-  Filter,
-  CalendarDays,
-} from "lucide-react";
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Calendar, CalendarDays, Filter, Search, Trophy, Users } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
+
 import { Tournament } from "@/app/(private)/admin/tournaments/page";
 import { mapTournaments } from "@/app/(private)/admin/tournaments/util";
-import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
-import Link from "next/link";
-import Loading from "@/components/ui/loading";
-
-// Mock data based on your Tournament interface
-
-// Extract years from tournament dates
-const getTournamentYear = (date: string) => new Date(date).getFullYear();
 
 const STATUS_FILTERS = ["ALL", "UPCOMING", "ONGOING", "COMPLETED"] as const;
 
+const getTournamentYear = (date: string) => new Date(date).getFullYear();
+
 export default function TournamentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
-  const { data, error, isLoading } = useSWR("/api/public/tournament", fetcher, {
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [activeYear, setActiveYear] = useState<number | null>(null);
+
+  const router = useRouter();
+  const { data, isLoading } = useSWR("/api/public/tournament", fetcher, {
     revalidateOnFocus: false,
   });
-  const tournaments: Tournament[] = mapTournaments(data);
-  // Calculate statistics
-  const ALL_YEARS = Array.from(
-    new Set(tournaments.map((t) => getTournamentYear(t.startingDate)))
-  ).sort((a, b) => b - a);
-  const router = useRouter();
-  const [activeYear, setActiveYear] = useState<number | null>();
-  useEffect(() => {
-    if (ALL_YEARS.length && activeYear === null) {
-      // Pick the most recent tournament year
-      setActiveYear(ALL_YEARS[0]);
-    }
-  }, [ALL_YEARS, activeYear]);
-  const filteredTournaments = useMemo(() => {
-    let filtered;
 
-    filtered = tournaments.filter(
-      (t) => getTournamentYear(t.startingDate) === activeYear
-    );
+  const tournaments: Tournament[] = mapTournaments(data);
+
+  const allYears = useMemo(
+    () =>
+      Array.from(new Set(tournaments.map((t) => getTournamentYear(t.startingDate)))).sort(
+        (a, b) => b - a
+      ),
+    [tournaments]
+  );
+
+
+  const selectedYear = activeYear ?? allYears[0] ?? null;
+
+  const filteredTournaments = useMemo(() => {
+    let filtered = selectedYear
+      ? tournaments.filter((t) => getTournamentYear(t.startingDate) === selectedYear)
+      : tournaments;
+
     if (statusFilter !== "ALL") {
       filtered = filtered.filter((t) => t.status === statusFilter);
     }
+
     if (searchQuery) {
       filtered = filtered.filter((t) =>
         t.tournamentName.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    if (!activeYear) filtered = tournaments;
-    return filtered;
-  }, [tournaments, activeYear, statusFilter, searchQuery]);
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
+    return filtered;
+  }, [searchQuery, selectedYear, statusFilter, tournaments]);
+
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       day: "numeric",
+      month: "short",
       year: "numeric",
     });
-  };
-
-  // Get status color
-  const getStatusColor = (status: Tournament["status"]) => {
-    switch (status) {
-      case "UPCOMING":
-        return "bg-blue-100 text-blue-700 border-blue-200";
-      case "ONGOING":
-        return "bg-green-100 text-green-700 border-green-200";
-      case "COMPLETED":
-        return "bg-gray-100 text-gray-700 border-gray-200";
-    }
-  };
-
-  // Handle card click
-  const handleCardClick = (tournamentId: string) => {
-    router.push(`/tournaments/${tournamentId}`);
-  };
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-gray-50 to-white">
-      {/* Hero Section */}
-      <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
-        <div className="relative px-6 py-24 md:py-32">
-          <div className="max-w-7xl mx-auto">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6">
-                <Trophy className="w-4 h-4 text-white" />
-                <span className="text-sm font-medium text-white">
-                  ASTU Football League
-                </span>
-              </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-                University{" "}
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-purple-400">
-                  Tournaments
-                </span>
-              </h1>
-              <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl">
-                Discover, compete, and celebrate in ASTU&apos;s premier football
-                tournaments. From freshmen cups to championship leagues.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 text-white/80">
-                  <Calendar className="w-5 h-5" />
-                  <span>{ALL_YEARS.length} Years of Competition</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/80">
-                  <Users className="w-5 h-5" />
-                  <span>
-                    {tournaments?.reduce((sum, t) => sum + (t.teams || 0), 0)}{" "}
-                    Teams
-                  </span>
-                </div>
-              </div>
+    <main className="min-h-screen bg-slate-950 text-white">
+      <section className="relative overflow-hidden border-b border-white/10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,rgba(59,130,246,0.3),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(14,165,233,0.25),transparent_30%)]" />
+        <div className="relative mx-auto max-w-7xl px-6 py-20 md:py-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-3xl"
+          >
+            <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">
+              <Trophy className="h-3.5 w-3.5" /> Tournament Center
+            </span>
+            <h1 className="text-4xl font-black leading-tight md:text-6xl">Discover ASTU Competitions</h1>
+            <p className="mt-4 max-w-2xl text-slate-300 md:text-lg">
+              Explore university tournaments with a cleaner, faster browsing flow designed for fans, players, and managers.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-4 text-sm text-slate-200">
+              <span className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-2"><CalendarDays className="h-4 w-4" /> {allYears.length} Seasons</span>
+              <span className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-2"><Users className="h-4 w-4" /> {tournaments.reduce((sum, t) => sum + (t.teams ?? 0), 0)} Teams</span>
             </div>
-          </div>
+          </motion.div>
         </div>
+      </section>
 
-        {/* Floating cards background */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t  from-gray-50 to-transparent" />
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10">
-        {/* Stats Cards */}
-
-        {/* Filters Section */}
-        <div className="mb-12">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Tournament Calendar
-              </h2>
-              <p className="text-gray-600 mt-2">
-                Browse through ASTU&apos;s football tournaments by year and
-                status
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search tournaments..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full lg:w-64"
-                />
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              </div>
-            </div>
-          </div>
-
-          {/* Year Filter */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <CalendarDays className="w-5 h-5 text-gray-600" />
-              <h3 className="text-lg font-semibold text-gray-900">
-                Select Year
-              </h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {ALL_YEARS.map((year) => (
-                <button
-                  key={year}
-                  onClick={() => setActiveYear(year)}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 border
-        ${
-          activeYear === year
-            ? "bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg border-transparent"
-            : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
-        }`}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Status Filter */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <Filter className="w-5 h-5 text-gray-600" />
-              <h3 className="text-lg font-semibold text-gray-900">
-                Filter by Status
-              </h3>
-            </div>
+      <section className="mx-auto max-w-7xl px-6 py-10">
+        <div className="mb-8 grid gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5 md:grid-cols-3">
+          <label className="md:col-span-2">
+            <span className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-300">Search</span>
+            <span className="flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900 px-3 py-2">
+              <Search className="h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search tournament by name"
+                className="w-full bg-transparent text-sm outline-hidden placeholder:text-slate-500"
+              />
+            </span>
+          </label>
+          <div>
+            <span className="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-300">Status</span>
             <div className="flex flex-wrap gap-2">
               {STATUS_FILTERS.map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
-                    ${
-                      statusFilter === status
-                        ? "bg-gray-900 text-white border-gray-900"
-                        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                    }`}
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                    statusFilter === status
+                      ? "border-cyan-300 bg-cyan-300/20 text-cyan-100"
+                      : "border-white/20 bg-white/5 text-slate-300 hover:bg-white/10"
+                  }`}
                 >
-                  {status.charAt(0) + status.slice(1).toLowerCase()}
+                  {status}
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Tournament Grid */}
-        {/* Tournament Grid Section */}
+        <div className="mb-8 flex flex-wrap gap-2">
+          {allYears.map((year) => (
+            <button
+              key={year}
+              onClick={() => setActiveYear(year)}
+              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                selectedYear === year
+                  ? "border-fuchsia-300 bg-fuchsia-300/20 text-fuchsia-100"
+                  : "border-white/20 bg-white/5 text-slate-300 hover:bg-white/10"
+              }`}
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+
         {isLoading ? (
-          // Loading state
-          <div className="mb-16">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">
-                Loading tournaments...
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Loading skeleton cards */}
-              {[...Array(3)].map((_, index) => (
-                <div
-                  key={index}
-                  className="group bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden animate-pulse"
-                >
-                  {/* Tournament Image skeleton */}
-                  <div className="relative h-48 overflow-hidden bg-gray-200" />
-                  {/* Tournament Info skeleton */}
-                  <div className="p-6">
-                    <div className="h-6 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                    <div className="flex items-center justify-between">
-                      <div className="h-4 w-20 bg-gray-200 rounded"></div>
-                      <div className="h-4 w-24 bg-gray-200 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <p className="rounded-2xl border border-white/10 bg-white/5 p-8 text-slate-300">Loading tournaments...</p>
         ) : filteredTournaments.length === 0 ? (
-          // Empty state
-          <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-linear-to-br from-gray-100 to-gray-200 mb-6">
-              <Trophy className="w-12 h-12 text-gray-400" />
-            </div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-3">
-              No tournaments found
-            </h3>
-            <p className="text-gray-600 max-w-md mx-auto mb-6">
-              {searchQuery
-                ? `No tournaments matching "${searchQuery}" found for ${activeYear}.`
-                : `No ${
-                    statusFilter !== "ALL" ? statusFilter.toLowerCase() : ""
-                  } tournaments found for ${activeYear}.`}
-            </p>
-            {(searchQuery || statusFilter !== "ALL") && (
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setStatusFilter("ALL");
-                }}
-                className="px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
-              >
-                Show all tournaments
-              </button>
-            )}
-          </div>
+          <p className="rounded-2xl border border-white/10 bg-white/5 p-8 text-slate-300">No tournament matches this filter.</p>
         ) : (
-          // Tournament grid with data
-          <div className="mb-16">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">
-                Showing {filteredTournaments.length} tournament
-                {filteredTournaments.length !== 1 ? "s" : ""}
-              </h3>
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Clear search
-                </button>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredTournaments.map((tournament) => (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {filteredTournaments.map((tournament, index) => (
+              <motion.article
+                key={tournament.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                onClick={() => router.push(`/tournaments/${tournament.id}`)}
+                className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-slate-900"
+              >
                 <div
-                  key={tournament.id}
-                  onClick={() => handleCardClick(tournament.id)}
-                  className="group bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                  className="relative h-44 border-b border-white/10 bg-slate-800 bg-cover bg-center"
+                  style={{ backgroundImage: tournament.logurl ? `url(${tournament.logurl})` : undefined }}
                 >
-                  {/* Tournament Image */}
-                  <div className="relative h-48 overflow-hidden">
-                    <div
-                      className="absolute inset-0 bg-linear-to-br from-gray-900 to-gray-800 group-hover:scale-105 transition-transform duration-500"
-                      style={{
-                        backgroundImage: tournament.logurl
-                          ? `url(${tournament.logurl})`
-                          : undefined,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }}
-                    >
-                      {!tournament.logurl && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Trophy className="w-16 h-16 text-gray-700" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-
-                    {/* Status Badge */}
-                    <div className="absolute top-4 left-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
-                          tournament.status
-                        )}`}
-                      >
-                        {tournament.status}
-                      </span>
-                    </div>
-
-                    {/* Year Badge */}
-                    <div className="absolute top-4 right-4 bg-primary/50 backdrop-blur-sm px-3 py-1 rounded-full">
-                      <span className="text-sm font-semibold text-white">
-                        {getTournamentYear(tournament.startingDate)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Tournament Info */}
-                  <div className="p-6">
-                    <h4 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                      {tournament.tournamentName}
-                    </h4>
-
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          {formatDate(tournament.startingDate)} -{" "}
-                          {formatDate(tournament.endingDate)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Users className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-700">
-                          {tournament.teams} Teams
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-blue-600 font-medium group-hover:gap-3 transition-all">
-                        <span className="text-sm">View Details</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </div>
-                    </div>
-                  </div>
+                  <div className="absolute inset-0 bg-linear-to-t from-slate-950 to-transparent" />
+                  <span className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/40 px-3 py-1 text-xs font-semibold backdrop-blur-sm">{tournament.status}</span>
                 </div>
-              ))}
-            </div>
+
+                <div className="space-y-3 p-5">
+                  <h3 className="text-lg font-bold transition group-hover:text-cyan-200">{tournament.tournamentName}</h3>
+                  <p className="flex items-center gap-2 text-xs text-slate-300"><Calendar className="h-4 w-4" /> {formatDate(tournament.startingDate)} - {formatDate(tournament.endingDate)}</p>
+                  <p className="flex items-center gap-2 text-xs text-slate-300"><Users className="h-4 w-4" /> {tournament.teams} Teams</p>
+                </div>
+              </motion.article>
+            ))}
           </div>
         )}
 
-        {/* CTA Section */}
-        <div className="bg-linear-to-r from-gray-900 to-gray-800 rounded-2xl p-8 md:p-12 mb-16">
-          <div className="max-w-3xl mx-auto text-center">
-            <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
-              Want participate on Tournaments?
-            </h3>
-            <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-              register with team key
-            </p>
-            <Link href={"/tournaments/register"}>
-              <button className="px-8 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-all hover:scale-105 active:scale-95">
-                click here to register
-              </button>
-            </Link>
-          </div>
+        <div className="mt-12 rounded-2xl border border-cyan-200/20 bg-cyan-100/5 p-8 text-center">
+          <h2 className="text-2xl font-bold">Ready to Join a Tournament?</h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-slate-300">If your team has an access key, register now and step into the next ASTU football season.</p>
+          <Link href="/tournaments/register" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-slate-900 transition hover:-translate-y-0.5">
+            Register Team <Filter className="h-4 w-4" />
+          </Link>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

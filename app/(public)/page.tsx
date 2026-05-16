@@ -1,290 +1,115 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
-  Trophy,
-  Calendar,
-  Users,
-  Newspaper,
-  Target,
-  ChevronRight,
   ArrowRight,
+  Calendar,
+  ChevronRight,
+  Newspaper,
+  Sparkles,
+  Trophy,
+  Users,
 } from "lucide-react";
+
+const navCards = [
+  {
+    href: "/tournaments",
+    title: "Tournaments",
+    desc: "Explore active and upcoming campus competitions.",
+    icon: Trophy,
+  },
+  {
+    href: "/matches",
+    title: "Matches",
+    desc: "Track schedules, scores, and match momentum.",
+    icon: Calendar,
+  },
+  {
+    href: "/teams",
+    title: "Teams",
+    desc: "Browse lineups, squads, and season form.",
+    icon: Users,
+  },
+  {
+    href: "/news",
+    title: "News",
+    desc: "Stay current with stories and announcements.",
+    icon: Newspaper,
+  },
+];
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
-      {/* Hero Section */}
-      <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
+    <main className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_25%,rgba(56,189,248,0.25),transparent_35%),radial-gradient(circle_at_75%_20%,rgba(168,85,247,0.22),transparent_38%),radial-gradient(circle_at_80%_80%,rgba(20,184,166,0.2),transparent_35%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:48px_48px]" />
 
-        <div className="relative px-6 py-24 md:py-32">
-          <div className="max-w-7xl mx-auto">
-            <div className="max-w-3xl text-center mx-auto">
-              {/* Logo/Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6">
-                <Trophy className="w-4 h-4 text-white" />
-                <span className="text-sm font-medium text-white">
-                  ASTU Football Management
-                </span>
-              </div>
+      <section className="relative mx-auto max-w-7xl px-6 pb-16 pt-24 md:pt-32">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55 }}
+          className="mx-auto max-w-3xl text-center"
+        >
+          <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">
+            <Sparkles className="h-3.5 w-3.5" />
+            ASTU Football Hub
+          </span>
 
-              {/* Main Title */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">
-                ASTU Football Platform
-              </h1>
+          <h1 className="text-balance text-4xl font-black leading-tight md:text-6xl">
+            Stadium energy, now in your browser.
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-base text-slate-300 md:text-lg">
+            The UniLeague platform connects tournaments, teams, and fans with a
+            fresh digital match-day experience.
+          </p>
 
-              {/* Description */}
-              <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                A comprehensive platform for managing university football
-                tournaments, tracking teams, and following matches. Everything
-                you need in one place.
-              </p>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/tournaments"
-                  className="px-8 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105 active:scale-95 transition-all duration-300 inline-flex items-center justify-center gap-2"
-                >
-                  <Trophy className="w-5 h-5" />
-                  Browse Tournaments
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </Link>
-                <Link
-                  href="/matches"
-                  className="px-8 py-3 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 hover:border-white/30 transition-all duration-300"
-                >
-                  View Matches
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-gray-50 to-transparent" />
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        {/* Quick Navigation */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Explore Our Platform
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Tournaments Card */}
+          <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <Link
               href="/tournaments"
-              className="group bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+              className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3 font-semibold text-slate-900 transition hover:-translate-y-0.5"
             >
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-xl bg-linear-to-r from-blue-100 to-blue-50 border border-blue-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Trophy className="w-8 h-8 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Tournaments
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Browse all university football tournaments and competitions
-                </p>
-                <div className="text-blue-600 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-                  <span>View All</span>
-                  <ChevronRight className="w-4 h-4" />
-                </div>
-              </div>
+              Enter Tournaments
+              <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </Link>
-
-            {/* Matches Card */}
             <Link
               href="/matches"
-              className="group bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+              className="inline-flex items-center justify-center rounded-xl border border-white/25 bg-white/10 px-7 py-3 font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
             >
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-xl bg-linear-to-r from-green-100 to-green-50 border border-green-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Calendar className="w-8 h-8 text-green-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Matches
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  View match schedules, results, and live scores
-                </p>
-                <div className="text-blue-600 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-                  <span>View Schedule</span>
-                  <ChevronRight className="w-4 h-4" />
-                </div>
-              </div>
-            </Link>
-
-            {/* Teams Card */}
-            <Link
-              href="/teams"
-              className="group bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-xl bg-linear-to-r from-purple-100 to-purple-50 border border-purple-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Users className="w-8 h-8 text-purple-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Teams</h3>
-                <p className="text-gray-600 mb-4">
-                  Explore all teams, players, and performance statistics
-                </p>
-                <div className="text-blue-600 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-                  <span>Browse Teams</span>
-                  <ChevronRight className="w-4 h-4" />
-                </div>
-              </div>
-            </Link>
-
-            {/* News Card */}
-            <Link
-              href="/news"
-              className="group bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-xl bg-linear-to-r from-orange-100 to-orange-50 border border-orange-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Newspaper className="w-8 h-8 text-orange-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">News</h3>
-                <p className="text-gray-600 mb-4">
-                  Stay updated with the latest football news and announcements
-                </p>
-                <div className="text-blue-600 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-                  <span>Read News</span>
-                  <ChevronRight className="w-4 h-4" />
-                </div>
-              </div>
+              Live Fixtures
             </Link>
           </div>
-        </div>
+        </motion.div>
+      </section>
 
-        {/* Platform Description */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-12">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-              About This Platform
-            </h2>
-
-            <div className="space-y-6 text-gray-700 text-lg">
-              <p>
-                The ASTU Football Management System is designed to streamline
-                and enhance the university football experience for everyone
-                involved - from players and coaches to students and fans.
-              </p>
-
-              <p>
-                Our platform provides real-time updates, comprehensive
-                statistics, and easy access to all football-related information
-                across Adama Science and Technology University.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Target className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">
-                      Live Updates
-                    </h4>
-                    <p className="text-gray-600 text-sm">
-                      Real-time match scores and tournament updates
-                    </p>
-                  </div>
+      <section className="relative mx-auto grid max-w-7xl grid-cols-1 gap-5 px-6 pb-20 md:grid-cols-2 lg:grid-cols-4">
+        {navCards.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: index * 0.08 }}
+            >
+              <Link
+                href={item.href}
+                className="group block rounded-2xl border border-white/15 bg-white/[0.04] p-6 backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white/[0.08]"
+              >
+                <div className="mb-5 inline-flex rounded-xl border border-white/20 bg-white/10 p-3">
+                  <Icon className="h-5 w-5 text-cyan-200" />
                 </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Calendar className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">
-                      Complete Schedule
-                    </h4>
-                    <p className="text-gray-600 text-sm">
-                      Full tournament and match schedule available
-                    </p>
-                  </div>
+                <h3 className="text-lg font-bold">{item.title}</h3>
+                <p className="mt-2 text-sm text-slate-300">{item.desc}</p>
+                <div className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-cyan-200">
+                  Explore <ChevronRight className="h-4 w-4" />
                 </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Users className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">
-                      Team Management
-                    </h4>
-                    <p className="text-gray-600 text-sm">
-                      Detailed team profiles and player statistics
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <Trophy className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">
-                      Tournament Hub
-                    </h4>
-                    <p className="text-gray-600 text-sm">
-                      All university tournaments in one place
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Links */}
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">
-            Quick Access
-          </h3>
-
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/tournaments"
-              className="px-6 py-3 bg-linear-to-r from-blue-600 to-blue-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
-            >
-              View Tournaments
-            </Link>
-
-            <Link
-              href="/matches"
-              className="px-6 py-3 bg-linear-to-r from-green-600 to-green-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
-            >
-              Check Matches
-            </Link>
-
-            <Link
-              href="/teams"
-              className="px-6 py-3 bg-linear-to-r from-purple-600 to-purple-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
-            >
-              Browse Teams
-            </Link>
-
-            <Link
-              href="/news"
-              className="px-6 py-3 bg-linear-to-r from-orange-600 to-orange-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
-            >
-              Read News
-            </Link>
-
-            <Link
-              href="/about"
-              className="px-6 py-3 bg-linear-to-r from-gray-600 to-gray-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
-            >
-              About Us
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+              </Link>
+            </motion.div>
+          );
+        })}
+      </section>
+    </main>
   );
 }
